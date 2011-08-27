@@ -71,6 +71,8 @@ public class DetachEventEmitter extends AbstractRequestCycleListener
 			logger.debug("Firing Detach event {}", cycle.getRequest().getUrl());
 
 			detachEvent.fire(new DetachEvent());
+			
+			cycle.setMetaData(DETACH_SCHEDULED_KEY, null);
 		}
 	}
 }
