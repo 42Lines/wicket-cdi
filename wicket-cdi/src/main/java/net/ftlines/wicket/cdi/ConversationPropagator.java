@@ -18,6 +18,7 @@ package net.ftlines.wicket.cdi;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.apache.wicket.MetaDataKey;
@@ -57,6 +58,9 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 
 	@Inject
 	Conversation conversation_;
+	
+	@Inject
+	private Event<Detach> detachEvent;
 
 	/**
 	 * Constructor
@@ -168,6 +172,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	@Override
 	public void onDetach(RequestCycle cycle)
 	{
+		detachEvent.fire(new Detach());
 		if (getConversation(cycle) != null)
 		{
 			container.deactivateConversationalContext(cycle);
