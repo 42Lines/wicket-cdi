@@ -48,6 +48,17 @@ public class CdiConfiguration
 		return beanManager;
 	}
 
+	public ConversationPropagation getPropagation()
+	{
+		return propagation;
+	}
+
+	public CdiConfiguration setPropagation(ConversationPropagation propagation)
+	{
+		this.propagation = propagation;
+		return this;
+	}
+
 	/**
 	 * Configures the specified application
 	 * 
@@ -58,7 +69,8 @@ public class CdiConfiguration
 	{
 		if (beanManager == null)
 		{
-			throw new IllegalStateException("Configuration does not have a BeanManager instance configured");
+			throw new IllegalStateException(
+				"Configuration does not have a BeanManager instance configured");
 		}
 
 		CdiContainer container = new CdiContainer(beanManager);
@@ -66,9 +78,10 @@ public class CdiConfiguration
 
 		application.getComponentInstantiationListeners().add(new CdiInjector(container));
 
-		if (propagation != ConversationPropagation.NONE)
+		if (getPropagation() != ConversationPropagation.NONE)
 		{
-			application.getRequestCycleListeners().add(new ConversationPropagator(container, propagation));
+			application.getRequestCycleListeners().add(
+				new ConversationPropagator(container, getPropagation()));
 		}
 
 		return container;
