@@ -18,7 +18,6 @@ package net.ftlines.wicket.cdi;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.apache.wicket.MetaDataKey;
@@ -30,6 +29,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A request cycle listener that takes care of propagating persistent conversations.
@@ -40,6 +41,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  */
 public class ConversationPropagator extends AbstractRequestCycleListener
 {
+	private static final Logger logger = LoggerFactory.getLogger(ConversationPropagator.class);
+
 	private static final MetaDataKey<String> CID_KEY = new MetaDataKey<String>()
 	{
 	};
@@ -58,9 +61,6 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 
 	@Inject
 	Conversation conversation_;
-	
-	@Inject
-	private Event<Detach> detachEvent;
 
 	/**
 	 * Constructor
@@ -98,6 +98,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 			cid = page.getMetaData(CID_KEY);
 		}
 
+		logger.debug("Activating conversation {}", cid);
 		container.activateConversationalContext(cycle, cid);
 		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
 	}
@@ -118,6 +119,9 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 		Page page = getPage(handler);
 		if (!conversation.isTransient() && page != null)
 		{
+			logger.debug("Propagating non-transient conversation {} via meta of page instance {}",
+				conversation.getId(), page);
+
 			page.setMetaData(CID_KEY, conversation.getId());
 		}
 
@@ -135,14 +139,21 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 		// propagate a conversation across non-bookmarkable page instances
 
 		Page page = getPage(handler);
-		if (page != null && !conversation.isTransient())
+		if (page != null)
 		{
+			logger.debug("Propagating non-transient conversation {} via meta of page instance {}",
+				conversation.getId(), page);
+
 			page.setMetaData(CID_KEY, conversation.getId());
 		}
 
 		if (propagation == ConversationPropagation.ALL)
 		{
 			// propagate cid to a scheduled bookmarkable page
+
+			logger.debug(
+				"Propagating non-transient conversation {} vua page parameters of handler {}",
+				conversation.getId(), handler);
 
 			PageParameters parameters = getPageParameters(handler);
 			if (parameters != null)
@@ -165,6 +176,9 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 		if (propagation == ConversationPropagation.ALL)
 		{
 			// propagate cid to bookmarkable pages via urls
+
+			logger.debug("Propagating non-transient conversation {} via url", conversation.getId());
+
 			url.setQueryParameter(CID, conversation.getId());
 		}
 	}
@@ -172,10 +186,14 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	@Override
 	public void onDetach(RequestCycle cycle)
 	{
-		detachEvent.fire(new Detach());
-		if (getConversation(cycle) != null)
+		Conversation conversation = getConversation(cycle);
+		if (conversation != null)
 		{
+			logger.debug("Deactivating conversation {}", conversation.getId());
+
 			container.deactivateConversationalContext(cycle);
+
+			cycle.setMetaData(CONVERSATION_STARTED_KEY, null);
 		}
 	}
 

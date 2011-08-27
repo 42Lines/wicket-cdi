@@ -17,9 +17,21 @@
 package net.ftlines.wicket.cdi.examples;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+
+import net.ftlines.wicket.cdi.DetachEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @ApplicationScoped
 public class ApplicationCounter extends Counter
 {
+	private static final Logger logger = LoggerFactory.getLogger(ApplicationCounter.class);
+
+	private void onDetach(@Observes DetachEvent detach)
+	{
+		logger.info("Detaching application counter");
+	}
 }

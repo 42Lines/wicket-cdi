@@ -19,6 +19,7 @@ package net.ftlines.wicket.cdi;
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.apache.wicket.Application;
+import org.apache.wicket.request.cycle.RequestCycleListenerCollection;
 import org.apache.wicket.util.lang.Args;
 
 /**
@@ -78,11 +79,16 @@ public class CdiConfiguration
 
 		application.getComponentInstantiationListeners().add(new CdiInjector(container));
 
+		RequestCycleListenerCollection listeners = new RequestCycleListenerCollection();
+
 		if (getPropagation() != ConversationPropagation.NONE)
 		{
-			application.getRequestCycleListeners().add(
-				new ConversationPropagator(container, getPropagation()));
+			listeners.add(new ConversationPropagator(container, getPropagation()));
 		}
+		
+		listeners.add(new DetachEventEmitter(container));
+
+		application.getRequestCycleListeners().add(listeners);
 
 		return container;
 	}

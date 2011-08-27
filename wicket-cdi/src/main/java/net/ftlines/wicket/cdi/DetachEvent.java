@@ -16,7 +16,13 @@
  */
 package net.ftlines.wicket.cdi;
 
-public class Detach
+/**
+ * Fired when request cycle is detached
+ * 
+ * @author igor
+ * 
+ */
+public class DetachEvent
 {
 
 }
