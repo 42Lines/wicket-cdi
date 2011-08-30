@@ -16,10 +16,23 @@
  */
 package net.ftlines.wicket.cdi.examples;
 
-import javax.enterprise.context.ConversationScoped;
+import static javax.enterprise.event.Reception.IF_EXISTS;
 
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.event.Observes;
+
+import net.ftlines.wicket.cdi.DetachEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ConversationScoped
 public class ConversationCounter extends Counter
 {
+	private static final Logger logger = LoggerFactory.getLogger(ConversationCounter.class);
+
+	void onDetach(@Observes(notifyObserver = IF_EXISTS) DetachEvent detach)
+	{
+		logger.info("Detaching conversational counter");
+	}
 }

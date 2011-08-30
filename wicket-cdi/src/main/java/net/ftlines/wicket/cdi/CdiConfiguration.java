@@ -19,6 +19,7 @@ package net.ftlines.wicket.cdi;
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.apache.wicket.Application;
+import org.apache.wicket.request.cycle.RequestCycleListenerCollection;
 import org.apache.wicket.util.lang.Args;
 
 /**
@@ -48,6 +49,17 @@ public class CdiConfiguration
 		return beanManager;
 	}
 
+	public ConversationPropagation getPropagation()
+	{
+		return propagation;
+	}
+
+	public CdiConfiguration setPropagation(ConversationPropagation propagation)
+	{
+		this.propagation = propagation;
+		return this;
+	}
+
 	/**
 	 * Configures the specified application
 	 * 
@@ -58,7 +70,8 @@ public class CdiConfiguration
 	{
 		if (beanManager == null)
 		{
-			throw new IllegalStateException("Configuration does not have a BeanManager instance configured");
+			throw new IllegalStateException(
+				"Configuration does not have a BeanManager instance configured");
 		}
 
 		CdiContainer container = new CdiContainer(beanManager);
@@ -66,10 +79,16 @@ public class CdiConfiguration
 
 		application.getComponentInstantiationListeners().add(new CdiInjector(container));
 
-		if (propagation != ConversationPropagation.NONE)
+		RequestCycleListenerCollection listeners = new RequestCycleListenerCollection();
+
+		if (getPropagation() != ConversationPropagation.NONE)
 		{
-			application.getRequestCycleListeners().add(new ConversationPropagator(container, propagation));
+			listeners.add(new ConversationPropagator(container, getPropagation()));
 		}
+		
+		listeners.add(new DetachEventEmitter(container));
+
+		application.getRequestCycleListeners().add(listeners);
 
 		return container;
 	}
