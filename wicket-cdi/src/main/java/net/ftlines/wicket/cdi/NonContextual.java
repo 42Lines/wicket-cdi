@@ -45,6 +45,26 @@ public class NonContextual<T>
 	final BeanManager manager;
 
 	/**
+	 * Undeploys specified bean manager from cache
+	 * 
+	 * @param beanManager
+	 */
+	public static void undeploy(BeanManager beanManager)
+	{
+		if (cache.containsKey(beanManager))
+		{
+			synchronized (lock)
+			{
+				// copy-on-write the cache
+				Map<BeanManager, ClassMetaCache<NonContextual<?>>> newCache = new WeakHashMap<BeanManager, ClassMetaCache<NonContextual<?>>>(
+					cache);
+				newCache.remove(beanManager);
+				cache = Collections.unmodifiableMap(newCache);
+			}
+		}
+	}
+
+	/**
 	 * Factory method for creating noncontextual instances
 	 * 
 	 * @param <T>
