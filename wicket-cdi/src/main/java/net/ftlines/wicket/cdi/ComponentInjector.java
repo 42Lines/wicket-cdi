@@ -25,7 +25,7 @@ import org.apache.wicket.application.IComponentInstantiationListener;
  * @author igor
  * 
  */
-public class CdiInjector implements IComponentInstantiationListener
+class ComponentInjector implements IComponentInstantiationListener
 {
 	private final CdiContainer container;
 
@@ -34,14 +34,14 @@ public class CdiInjector implements IComponentInstantiationListener
 	 * 
 	 * @param container
 	 */
-	public CdiInjector(CdiContainer container)
+	public ComponentInjector(CdiContainer container)
 	{
 		this.container = container;
 	}
 
 	public void onInstantiation(Component component)
 	{
-		container.inject(component);
+		container.getNonContextualManager().postConstruct(component);
 	}
 
 }

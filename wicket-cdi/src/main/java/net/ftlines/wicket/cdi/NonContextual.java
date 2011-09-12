@@ -30,7 +30,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import org.apache.wicket.util.collections.ClassMetaCache;
 
 /**
- * Injects non-CDI-managed beans with CDI dependencies
+ * Manages lifecycle of non-contextual (non-CDI-managed) objects
  * 
  * @author igor
  * 
@@ -90,6 +90,7 @@ public class NonContextual<T>
 		return meta;
 	}
 
+	@SuppressWarnings("unchecked")
 	private NonContextual(BeanManager manager, Class<? extends T> clazz)
 	{
 		this.manager = manager;

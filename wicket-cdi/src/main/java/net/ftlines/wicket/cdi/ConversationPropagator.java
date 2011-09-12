@@ -79,7 +79,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 		this.container = container;
 		this.propagation = propagation;
 
-		container.inject(this);
+		container.getNonContextualManager().postConstruct(this);
 	}
 
 	private Conversation getConversation(RequestCycle cycle)

@@ -41,17 +41,21 @@ public class CdiContainer
 
 	protected final BeanManager beanManager;
 	private final SeamConversationContext<HttpServletRequest> conversationContext;
-
+	private final INonContextualManager nonContextualManager;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param beanManager
 	 *            bean manager
 	 */
-	public CdiContainer(BeanManager beanManager)
+	public CdiContainer(BeanManager beanManager, INonContextualManager nonContextualManager)
 	{
 		Args.notNull(beanManager, "beanManager");
+		Args.notNull(nonContextualManager, "nonContextualManager");
+		
 		this.beanManager = beanManager;
+		this.nonContextualManager=nonContextualManager;
 
 		conversationContext = SeamConversationContextFactory.getContext(HttpServletRequest.class);
 		if (conversationContext == null)
@@ -61,10 +65,9 @@ public class CdiContainer
 		}
 	}
 
-	public <T> void inject(T instance)
+	public INonContextualManager getNonContextualManager()
 	{
-		Args.notNull(instance, "instance");
-		NonContextual.of(instance.getClass(), beanManager).postConstruct(instance);
+		return nonContextualManager;
 	}
 
 	/**

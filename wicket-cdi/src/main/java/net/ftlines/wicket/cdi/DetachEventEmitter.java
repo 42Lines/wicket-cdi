@@ -52,7 +52,7 @@ public class DetachEventEmitter extends AbstractRequestCycleListener
 	public DetachEventEmitter(CdiContainer container)
 	{
 		Args.notNull(container, "container");
-		container.inject(this);
+		container.getNonContextualManager().postConstruct(this);
 	}
 
 	@Override

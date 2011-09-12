@@ -32,11 +32,14 @@ public class CdiConfiguration
 {
 	private BeanManager beanManager;
 	private ConversationPropagation propagation = ConversationPropagation.NONBOOKMARKABLE;
-
+	private INonContextualManager nonContextualManager;
+	
 	public CdiConfiguration(BeanManager beanManager)
 	{
 		Args.notNull(beanManager, "beanManager");
+		
 		this.beanManager = beanManager;
+		this.nonContextualManager=new NonContextualManager(beanManager);
 	}
 
 	/**
@@ -60,6 +63,17 @@ public class CdiConfiguration
 		return this;
 	}
 
+	public INonContextualManager getNonContextualManager()
+	{
+		return nonContextualManager;
+	}
+
+	public CdiConfiguration setNonContextualManager(INonContextualManager nonContextualManager)
+	{
+		this.nonContextualManager = nonContextualManager;
+		return this;
+	}
+
 	/**
 	 * Configures the specified application
 	 * 
@@ -74,21 +88,23 @@ public class CdiConfiguration
 				"Configuration does not have a BeanManager instance configured");
 		}
 
-		CdiContainer container = new CdiContainer(beanManager);
+		CdiContainer container = new CdiContainer(beanManager, nonContextualManager);
 		container.bind(application);
 
-		application.getComponentInstantiationListeners().add(new CdiInjector(container));
+		// enable component injection
+		application.getComponentInstantiationListeners().add(new ComponentInjector(container));
 
 		RequestCycleListenerCollection listeners = new RequestCycleListenerCollection();
-
+		application.getRequestCycleListeners().add(listeners);
+		
+		// enable conversation propagation
 		if (getPropagation() != ConversationPropagation.NONE)
 		{
 			listeners.add(new ConversationPropagator(container, getPropagation()));
 		}
 		
+		// enable detach event
 		listeners.add(new DetachEventEmitter(container));
-
-		application.getRequestCycleListeners().add(listeners);
 
 		return container;
 	}
