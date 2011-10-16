@@ -29,7 +29,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.lang.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,47 +88,19 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 			: null;
 	}
 
-	@Override
-	public void onBeginRequest(RequestCycle cycle)
-	{
-		String cid = cycle.getRequest().getRequestParameters().getParameterValue("cid").toString();
-
-		// start a conversation based on the url cid parameter. this conversation can later be
-		// deactivated if we find a different cid in a request handler we resolve later.
-
-		logger.debug("Activating conversation {}", cid);
-
-		container.activateConversationalContext(cycle, cid);
-		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
-	}
-
 	public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler)
 	{
-		String cid = null;
+		String cid = cycle.getRequest().getRequestParameters().getParameterValue("cid").toString();
 		Page page = getPage(handler);
 
-		if (page != null)
+		if (cid == null && page != null)
 		{
 			cid = page.getMetaData(CID_KEY);
 		}
 
-		Conversation conversation = getConversation(cycle);
-		if (cid != null && !Objects.equal(conversation.getId(), cid))
-		{
-			// deactivate the current temporary conversation we started in onbeginrequest()
-
-			logger.debug(
-				"Deactivating conversation {} because another cid was found in a resolved request handler",
-				cid);
-
-			container.deactivateConversationalContext(cycle);
-
-			// activate the converastion resolved from the request handler
-
-			logger.debug("Activating conversation {}", cid);
-
-			container.activateConversationalContext(cycle, cid);
-		}
+		logger.debug("Activating conversation {}", cid);
+		container.activateConversationalContext(cycle, cid);
+		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
 	}
 
 	@Override
