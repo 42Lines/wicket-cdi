@@ -100,7 +100,7 @@ public class CdiConfiguration
 		// enable conversation propagation
 		if (getPropagation() != ConversationPropagation.NONE)
 		{
-			listeners.add(new ConversationPropagator(container, getPropagation()));
+			listeners.add(new ConversationPropagator(application, container, getPropagation()));
 		}
 		
 		// enable detach event

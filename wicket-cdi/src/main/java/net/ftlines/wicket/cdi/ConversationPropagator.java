@@ -20,15 +20,18 @@ import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
 import javax.inject.Inject;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.Page;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.lang.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +62,8 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	/** propagation mode to use */
 	private final ConversationPropagation propagation;
 
+	private final Application application;
+
 	@Inject
 	Conversation conversation_;
 
@@ -68,14 +73,20 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	 * @param container
 	 * @param propagation
 	 */
-	public ConversationPropagator(CdiContainer container, ConversationPropagation propagation)
+	public ConversationPropagator(Application application, CdiContainer container,
+		ConversationPropagation propagation)
 	{
+		Args.notNull(application, "application");
+		Args.notNull(container, "container");
+		Args.notNull(propagation, "propagation");
+
 		if (propagation == ConversationPropagation.NONE)
 		{
 			throw new IllegalArgumentException(
 				"If propagation is NONE do not set up the propagator");
 		}
 
+		this.application = application;
 		this.container = container;
 		this.propagation = propagation;
 
@@ -100,6 +111,14 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 
 		logger.debug("Activating conversation {}", cid);
 		container.activateConversationalContext(cycle, cid);
+		for (IRequestCycleListener listener : application.getRequestCycleListeners())
+		{
+			if (listener instanceof ICdiAwareRequestCycleListener)
+			{
+				((ICdiAwareRequestCycleListener)listener).onAfterConversationActivated(cycle);
+			}
+		}
+
 		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
 	}
 
@@ -191,6 +210,13 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 		{
 			logger.debug("Deactivating conversation {}", conversation.getId());
 
+			for (IRequestCycleListener listener : application.getRequestCycleListeners())
+			{
+				if (listener instanceof ICdiAwareRequestCycleListener)
+				{
+					((ICdiAwareRequestCycleListener)listener).onBeforeConversationDeactivated(cycle);
+				}
+			}
 			container.deactivateConversationalContext(cycle);
 
 			cycle.setMetaData(CONVERSATION_STARTED_KEY, null);
