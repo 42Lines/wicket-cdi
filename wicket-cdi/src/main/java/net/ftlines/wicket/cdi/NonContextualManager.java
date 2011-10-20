@@ -41,6 +41,13 @@ class NonContextualManager implements INonContextualManager
 
 		this.beanManager = beanManager;
 	}
+	
+	@Override
+	public <T> void inject(T instance)
+	{
+		Args.notNull(instance, "instance");
+		NonContextual.of(instance.getClass(), beanManager).inject(instance);
+	}
 
 	@Override
 	public <T> void postConstruct(T instance)

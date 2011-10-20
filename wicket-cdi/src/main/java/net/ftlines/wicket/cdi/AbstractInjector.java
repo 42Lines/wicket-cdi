@@ -28,8 +28,13 @@ class AbstractInjector
 		this.container = container;
 	}
 
-	protected <T> void inject(T instance)
+	protected <T> void postConstruct(T instance)
 	{
 		container.getNonContextualManager().postConstruct(instance);
+	}
+	
+	protected <T> void inject(T instance)
+	{
+		container.getNonContextualManager().inject(instance);
 	}
 }

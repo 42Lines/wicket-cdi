@@ -122,13 +122,23 @@ public class NonContextual<T>
 	 * Injects the instance and calls any {@link PostConstruct} methods
 	 * 
 	 * @param instance
-	 * @return
 	 */
 	public void postConstruct(T instance)
 	{
 		CreationalContext<T> cc = manager.createCreationalContext(null);
 		it.inject(instance, cc);
 		it.postConstruct(instance);
+	}
+	
+	/**
+	 * Injects the instance
+	 * 
+	 * @param instance
+	 */
+	public void inject(T instance)
+	{
+		CreationalContext<T> cc = manager.createCreationalContext(null);
+		it.inject(instance, cc);
 	}
 
 	/**

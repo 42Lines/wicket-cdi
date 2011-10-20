@@ -40,7 +40,7 @@ class SessionInjector extends AbstractInjector implements ISessionListener
 	@Override
 	public void onCreated(Session session)
 	{
-		inject(session);
+		postConstruct(session);
 	}
 
 }

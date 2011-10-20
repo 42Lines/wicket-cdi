@@ -30,6 +30,14 @@ import org.apache.wicket.Component;
 public interface INonContextualManager
 {
 	/**
+	 * Inject a noncontextual instance
+	 * 
+	 * @param <T>
+	 * @param instance
+	 */
+	<T> void inject(T instance);
+	
+	/**
 	 * Inject a noncontextual instance and invokes any {@link PostConstruct} callbacks
 	 * 
 	 * @param <T>
