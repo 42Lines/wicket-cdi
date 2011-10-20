@@ -6,8 +6,8 @@ Wicket-CDI provides integration of CDI into Wicket
 
 * `Application` instance will be injected and its `@PostConstruct` methods will be invoked. Upon shutdown `@PreDestroy` methods will be invoked.
 * `Session` instances will be injected and its `@PostConstruct` methods will be invoked. `@PreDestroy` methods will not be invoked because servlet containers only notify after session has been destroyed.
-* `Component` instances will be injected. `@PostConstruct` methods will not be called because component injection happens in the base constructor and so if invoked these methods would run before the constructor of the class they are defined on has finished. `@PreDestroy` methods will not be called because there is no clear point at which a component instance is retired.
-* `Behavior` instances will be injected. `@PostConstruct` and `@PreDestroy` methods behave in the same was as on `Component`.
+* `Component` instances will be injected. `@PostConstruct` methods will not be called because component injection happens in the base constructor and so if invoked these methods would run before the constructor of the class they are defined in has finished. `@PreDestroy` methods will not be called because there is no clear point at which a component instance is retired.
+* `Behavior` instances will be injected. `@PostConstruct` and `@PreDestroy` methods have the semantics as methods in `Component`.
 
 #### Automatic Propagation of Long Running (Non-Transient) Conversations
 
@@ -72,4 +72,12 @@ Configuration of Wicket-CDI is done via a `CdiConfiguration` object that uses a 
 	    }
     }
 
-	
+Example code retrieving the BeanManager from Weld running in a servlet container:
+
+    import org.jboss.weld.environment.servlet.Listener;
+	...
+    public class MyApplication extends WebApplication {
+	    protected void init() {
+            BeanManager manager = (BeanManager)getServletContext().getAttribute(Listener.BEAN_MANAGER_ATTRIBUTE_NAME);
+        }
+    }
