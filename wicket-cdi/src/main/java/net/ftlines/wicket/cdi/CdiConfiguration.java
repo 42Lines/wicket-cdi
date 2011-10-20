@@ -160,7 +160,7 @@ public class CdiConfiguration
 		}
 
 		// enable injection of various framework components
-		
+
 		if (isInjectSession())
 		{
 			application.getSessionListeners().add(new SessionInjector(container));
@@ -176,6 +176,10 @@ public class CdiConfiguration
 			application.getBehaviorInstantiationListeners().add(new BehaviorInjector(container));
 		}
 
+		// enable cleanup
+
+		application.getApplicationListeners().add(
+			new CdiShutdownCleaner(beanManager, isInjectApplication()));
 
 		return container;
 	}
