@@ -20,7 +20,9 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Application;
+import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
+import org.apache.wicket.Page;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Args;
 import org.jboss.seam.conversation.spi.SeamConversationContext;
@@ -42,20 +44,24 @@ public class CdiContainer
 	protected final BeanManager beanManager;
 	private final SeamConversationContext<HttpServletRequest> conversationContext;
 	private final INonContextualManager nonContextualManager;
-	
+	private final ConversationPropagation conversationPropagation;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param beanManager
 	 *            bean manager
 	 */
-	public CdiContainer(BeanManager beanManager, INonContextualManager nonContextualManager)
+	public CdiContainer(BeanManager beanManager, INonContextualManager nonContextualManager,
+		ConversationPropagation conversationPropagation)
 	{
 		Args.notNull(beanManager, "beanManager");
 		Args.notNull(nonContextualManager, "nonContextualManager");
-		
+		Args.notNull(conversationPropagation, "conversationPropagation");
+
 		this.beanManager = beanManager;
-		this.nonContextualManager=nonContextualManager;
+		this.nonContextualManager = nonContextualManager;
+		this.conversationPropagation = conversationPropagation;
 
 		conversationContext = SeamConversationContextFactory.getContext(HttpServletRequest.class);
 		if (conversationContext == null)
@@ -98,6 +104,29 @@ public class CdiContainer
 		return (HttpServletRequest)cycle.getRequest().getContainerRequest();
 	}
 
+	/**
+	 * Removes conversation marker from the page instance which prevents the conversation from
+	 * propagating to the page. This method should usually be called from page's {@code onDetach()}
+	 * method.
+	 * 
+	 * @param page
+	 * 
+	 * @throws UnsupportedOperationException
+	 *             if conversation propagation mode does not support this method
+	 */
+	public void removeConversationMarker(Page page)
+	{
+		Args.notNull(page, "page");
+
+		if (!conversationPropagation.getSupportsPropagationMarkerRemoval())
+		{
+			throw new UnsupportedOperationException("Current conversational propagation mode: " +
+				conversationPropagation.name() +
+				" does not support the ability to remove the converation marker");
+		}
+
+		page.setMetaData(ConversationIdMetaKey.INSTANCE, null);
+	}
 
 	/**
 	 * Binds this container instance to the {@link Application}, making it possible to retrieve it

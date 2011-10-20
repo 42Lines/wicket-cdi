@@ -46,9 +46,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConversationPropagator.class);
 
-	private static final MetaDataKey<String> CID_KEY = new MetaDataKey<String>()
-	{
-	};
+	private static final MetaDataKey<String> CID_KEY = ConversationIdMetaKey.INSTANCE;
 
 	private static final MetaDataKey<Boolean> CONVERSATION_STARTED_KEY = new MetaDataKey<Boolean>()
 	{
