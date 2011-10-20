@@ -33,13 +33,19 @@ public class CdiConfiguration
 	private BeanManager beanManager;
 	private ConversationPropagation propagation = ConversationPropagation.NONBOOKMARKABLE;
 	private INonContextualManager nonContextualManager;
-	
+
+	private boolean injectComponents = true;
+	private boolean injectApplication = true;
+	private boolean injectSession = true;
+	private boolean injectBehaviors = true;
+
+
 	public CdiConfiguration(BeanManager beanManager)
 	{
 		Args.notNull(beanManager, "beanManager");
-		
+
 		this.beanManager = beanManager;
-		this.nonContextualManager=new NonContextualManager(beanManager);
+		this.nonContextualManager = new NonContextualManager(beanManager);
 	}
 
 	/**
@@ -74,6 +80,50 @@ public class CdiConfiguration
 		return this;
 	}
 
+	public boolean isInjectComponents()
+	{
+		return injectComponents;
+	}
+
+	public CdiConfiguration setInjectComponents(boolean injectComponents)
+	{
+		this.injectComponents = injectComponents;
+		return this;
+	}
+
+	public boolean isInjectApplication()
+	{
+		return injectApplication;
+	}
+
+	public CdiConfiguration setInjectApplication(boolean injectApplication)
+	{
+		this.injectApplication = injectApplication;
+		return this;
+	}
+
+	public boolean isInjectSession()
+	{
+		return injectSession;
+	}
+
+	public CdiConfiguration setInjectSession(boolean injectSession)
+	{
+		this.injectSession = injectSession;
+		return this;
+	}
+
+	public boolean isInjectBehaviors()
+	{
+		return injectBehaviors;
+	}
+
+	public CdiConfiguration setInjectBehaviors(boolean injectBehaviors)
+	{
+		this.injectBehaviors = injectBehaviors;
+		return this;
+	}
+
 	/**
 	 * Configures the specified application
 	 * 
@@ -91,20 +141,41 @@ public class CdiConfiguration
 		CdiContainer container = new CdiContainer(beanManager, nonContextualManager);
 		container.bind(application);
 
-		// enable component injection
-		application.getComponentInstantiationListeners().add(new ComponentInjector(container));
-
 		RequestCycleListenerCollection listeners = new RequestCycleListenerCollection();
 		application.getRequestCycleListeners().add(listeners);
-		
+
 		// enable conversation propagation
 		if (getPropagation() != ConversationPropagation.NONE)
 		{
 			listeners.add(new ConversationPropagator(application, container, getPropagation()));
 		}
-		
+
 		// enable detach event
 		listeners.add(new DetachEventEmitter(container));
+
+		// inject application instance
+		if (isInjectApplication())
+		{
+			NonContextual.of(Application.class, beanManager).postConstruct(application);
+		}
+
+		// enable injection of various framework components
+		
+		if (isInjectSession())
+		{
+			application.getSessionListeners().add(new SessionInjector(container));
+		}
+
+		if (isInjectComponents())
+		{
+			application.getComponentInstantiationListeners().add(new ComponentInjector(container));
+		}
+
+		if (isInjectBehaviors())
+		{
+			application.getBehaviorInstantiationListeners().add(new BehaviorInjector(container));
+		}
+
 
 		return container;
 	}

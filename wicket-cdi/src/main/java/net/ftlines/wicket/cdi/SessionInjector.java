@@ -16,8 +16,8 @@
  */
 package net.ftlines.wicket.cdi;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.ISessionListener;
+import org.apache.wicket.Session;
 
 /**
  * Injects components with CDI dependencies
@@ -25,22 +25,22 @@ import org.apache.wicket.application.IComponentInstantiationListener;
  * @author igor
  * 
  */
-class ComponentInjector extends AbstractInjector implements IComponentInstantiationListener
+class SessionInjector extends AbstractInjector implements ISessionListener
 {
 	/**
 	 * Constructor
 	 * 
 	 * @param container
 	 */
-	public ComponentInjector(CdiContainer container)
+	public SessionInjector(CdiContainer container)
 	{
 		super(container);
 	}
 
 	@Override
-	public void onInstantiation(Component component)
+	public void onCreated(Session session)
 	{
-		inject(component);
+		inject(session);
 	}
 
 }

@@ -16,31 +16,20 @@
  */
 package net.ftlines.wicket.cdi;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.util.lang.Args;
 
-/**
- * Injects components with CDI dependencies
- * 
- * @author igor
- * 
- */
-class ComponentInjector extends AbstractInjector implements IComponentInstantiationListener
+class AbstractInjector
 {
-	/**
-	 * Constructor
-	 * 
-	 * @param container
-	 */
-	public ComponentInjector(CdiContainer container)
+	private final CdiContainer container;
+
+	public AbstractInjector(CdiContainer container)
 	{
-		super(container);
+		Args.notNull(container, "container");
+		this.container = container;
 	}
 
-	@Override
-	public void onInstantiation(Component component)
+	protected <T> void inject(T instance)
 	{
-		inject(component);
+		container.getNonContextualManager().postConstruct(instance);
 	}
-
 }

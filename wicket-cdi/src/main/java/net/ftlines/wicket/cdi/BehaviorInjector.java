@@ -16,8 +16,8 @@
  */
 package net.ftlines.wicket.cdi;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.IBehaviorInstantiationListener;
+import org.apache.wicket.behavior.Behavior;
 
 /**
  * Injects components with CDI dependencies
@@ -25,22 +25,21 @@ import org.apache.wicket.application.IComponentInstantiationListener;
  * @author igor
  * 
  */
-class ComponentInjector extends AbstractInjector implements IComponentInstantiationListener
+class BehaviorInjector extends AbstractInjector implements IBehaviorInstantiationListener
 {
 	/**
 	 * Constructor
 	 * 
 	 * @param container
 	 */
-	public ComponentInjector(CdiContainer container)
+	public BehaviorInjector(CdiContainer container)
 	{
 		super(container);
 	}
 
 	@Override
-	public void onInstantiation(Component component)
+	public void onInstantiation(Behavior behavior)
 	{
-		inject(component);
+		inject(behavior);
 	}
-
 }
