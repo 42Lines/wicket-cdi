@@ -8,7 +8,7 @@
 	<groupId>net.ftlines.wicket-cdi</groupId>
 	<artifactId>wicket-cdi-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<name>Wicket-CDI Parent</name>
 	<description>Integrates Wicket with CDI containers</description>
 	<licenses>
