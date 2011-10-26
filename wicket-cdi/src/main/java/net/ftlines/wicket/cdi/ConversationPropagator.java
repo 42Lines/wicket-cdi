@@ -99,6 +99,14 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 
 	public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler)
 	{
+		if (getConversation(cycle) != null)
+		{
+			// conversation has already been started
+			return;
+		}
+
+		// start a new conversation
+
 		String cid = cycle.getRequest().getRequestParameters().getParameterValue("cid").toString();
 		Page page = getPage(handler);
 
