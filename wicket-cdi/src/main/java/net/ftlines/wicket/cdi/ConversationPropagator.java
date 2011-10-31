@@ -115,7 +115,25 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 			cid = page.getMetaData(CID_KEY);
 		}
 
+		activateConversationIfNeeded(cycle, cid);
+	}
+	
+	@Override
+	public IRequestHandler onException(RequestCycle cycle, Exception ex)
+	{
+		activateConversationIfNeeded(cycle, null);
+		return null;
+	}
+	
+	private void activateConversationIfNeeded(RequestCycle cycle, String cid)
+	{
+		if (getConversation(cycle) != null)
+		{
+			return;
+		}
+
 		logger.debug("Activating conversation {}", cid);
+		
 		container.activateConversationalContext(cycle, cid);
 		for (IRequestCycleListener listener : application.getRequestCycleListeners())
 		{
@@ -124,7 +142,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 				((ICdiAwareRequestCycleListener)listener).onAfterConversationActivated(cycle);
 			}
 		}
-
+		
 		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
 	}
 
