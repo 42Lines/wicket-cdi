@@ -156,7 +156,7 @@ public class CdiConfiguration
 		// inject application instance
 		if (isInjectApplication())
 		{
-			NonContextual.of(application.getClass(), beanManager).postConstruct(application);
+			container.getNonContextualManager().postConstruct(application);
 		}
 
 		// enable injection of various framework components
