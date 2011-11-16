@@ -16,6 +16,8 @@
  */
 package net.ftlines.wicket.cdi;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.apache.wicket.util.lang.Args;
@@ -41,7 +43,10 @@ class NonContextualManager implements INonContextualManager
 
 		this.beanManager = beanManager;
 	}
-	
+
+	/**
+	 * Performs dependency injection on the noncontextual instance
+	 */
 	@Override
 	public <T> void inject(T instance)
 	{
@@ -49,6 +54,10 @@ class NonContextualManager implements INonContextualManager
 		NonContextual.of(instance.getClass(), beanManager).inject(instance);
 	}
 
+	/**
+	 * Performs dependency injection on the noncontextual instance and invokes any
+	 * {@link PostConstruct} callbacks
+	 */
 	@Override
 	public <T> void postConstruct(T instance)
 	{
@@ -56,6 +65,9 @@ class NonContextualManager implements INonContextualManager
 		NonContextual.of(instance.getClass(), beanManager).postConstruct(instance);
 	}
 
+	/**
+	 * Invokes any {@link PreDestroy} callbacks and cleans up any injected dependencies
+	 */
 	@Override
 	public <T> void preDestroy(T instance)
 	{
