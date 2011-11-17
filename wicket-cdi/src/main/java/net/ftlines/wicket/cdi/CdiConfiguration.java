@@ -148,6 +148,7 @@ public class CdiConfiguration
 		if (getPropagation() != ConversationPropagation.NONE)
 		{
 			listeners.add(new ConversationPropagator(application, container, getPropagation()));
+			application.getComponentPreOnBeforeRenderListeners().add(new ConversationExpiryChecker(container));
 		}
 
 		// enable detach event

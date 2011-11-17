@@ -18,6 +18,7 @@ package net.ftlines.wicket.cdi;
 
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.NonexistentConversationException;
 import javax.inject.Inject;
 
 import org.apache.wicket.Application;
@@ -28,10 +29,12 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.BufferedResponseRequestHandler;
 import org.apache.wicket.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.lang.Args;
+import org.apache.wicket.util.lang.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,15 +102,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 
 	public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler)
 	{
-		if (getConversation(cycle) != null)
-		{
-			// conversation has already been started
-			return;
-		}
-
-		// start a new conversation
-
-		String cid = cycle.getRequest().getRequestParameters().getParameterValue("cid").toString();
+		String cid = cycle.getRequest().getRequestParameters().getParameterValue(CID).toString();
 		Page page = getPage(handler);
 
 		if (cid == null && page != null)
@@ -115,26 +110,52 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 			cid = page.getMetaData(CID_KEY);
 		}
 
-		activateConversationIfNeeded(cycle, cid);
+		Conversation current = getConversation(cycle);
+		if (current != null && !Objects.isEqual(current.getId(), cid))
+		{
+			throw new ConversationExpiredException(null, cid, getPage(handler), handler);
+		}
+
+		activateConversationIfNeeded(cycle, handler, cid);
 	}
-	
+
 	@Override
 	public IRequestHandler onException(RequestCycle cycle, Exception ex)
 	{
-		activateConversationIfNeeded(cycle, null);
+		activateConversationIfNeeded(cycle, null, null);
 		return null;
 	}
-	
-	private void activateConversationIfNeeded(RequestCycle cycle, String cid)
+
+	private void activateConversationIfNeeded(RequestCycle cycle, IRequestHandler handler,
+		String cid)
 	{
-		if (getConversation(cycle) != null)
+		Conversation current = getConversation(cycle);
+
+		if (current != null||!activateForHandler(handler))
 		{
 			return;
 		}
-
-		logger.debug("Activating conversation {}", cid);
 		
-		container.activateConversationalContext(cycle, cid);
+		logger.debug("Activating conversation {}", cid);
+
+		try
+		{
+			container.activateConversationalContext(cycle, cid);
+			fireOnAfterConversationStarted(cycle);
+		}
+		catch (NonexistentConversationException e)
+		{
+			logger.info("Unable to restore conversation with id {}", cid, e.getMessage());
+			logger.debug("Unable to restore conversation", e);
+			fireOnAfterConversationStarted(cycle);
+			throw new ConversationExpiredException(e, cid, getPage(handler), handler);
+		}
+
+		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
+	}
+
+	private void fireOnAfterConversationStarted(RequestCycle cycle)
+	{
 		for (IRequestCycleListener listener : application.getRequestCycleListeners())
 		{
 			if (listener instanceof ICdiAwareRequestCycleListener)
@@ -142,8 +163,6 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 				((ICdiAwareRequestCycleListener)listener).onAfterConversationActivated(cycle);
 			}
 		}
-		
-		cycle.setMetaData(CONVERSATION_STARTED_KEY, true);
 	}
 
 	@Override
@@ -195,13 +214,13 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 			// propagate cid to a scheduled bookmarkable page
 
 			logger.debug(
-				"Propagating non-transient conversation {} vua page parameters of handler {}",
+				"Propagating non-transient conversation {} via page parameters of handler {}",
 				conversation.getId(), handler);
 
 			PageParameters parameters = getPageParameters(handler);
 			if (parameters != null)
 			{
-				parameters.add(CID, conversation.getId());
+				parameters.set(CID, conversation.getId());
 			}
 		}
 	}
@@ -245,6 +264,27 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 
 			cycle.setMetaData(CONVERSATION_STARTED_KEY, null);
 		}
+	}
+
+	/**
+	 * Determines whether or not a conversation should be activated fro the specified handler. This
+	 * method is used to filter out conversation activation for utility handlers such as the
+	 * {@link BufferedResponseRequestHandler}
+	 * 
+	 * @param handler
+	 * @return {@code true} iff a conversation should be activated
+	 */
+	protected boolean activateForHandler(IRequestHandler handler)
+	{
+		if (handler != null)
+		{
+			if (handler instanceof BufferedResponseRequestHandler)
+			{
+				// we do not care about pages that are being rendered from a buffer
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

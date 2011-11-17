@@ -20,7 +20,6 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Application;
-import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.Page;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -102,6 +101,18 @@ public class CdiContainer
 	private HttpServletRequest getRequest(RequestCycle cycle)
 	{
 		return (HttpServletRequest)cycle.getRequest().getContainerRequest();
+	}
+
+	/**
+	 * Retrieves a conversation id, if any, that is associated with a {@link Page} instance
+	 * 
+	 * @param page
+	 *            page instance
+	 * @return conversation id, if any
+	 */
+	public String getConverastionMarker(Page page)
+	{
+		return page.getMetaData(ConversationIdMetaKey.INSTANCE);
 	}
 
 	/**
