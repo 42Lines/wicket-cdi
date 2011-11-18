@@ -56,7 +56,7 @@ public class ConversationExpiryChecker implements IComponentOnBeforeRenderListen
 		if (component instanceof Page || AjaxRequestTarget.get() != null)
 		{
 			Page page = component.getPage();
-			String cid = container.getConverastionMarker(page);
+			String cid = container.getConversationMarker(page);
 			if (cid != null && !Objects.isEqual(conversation.getId(), cid))
 				throw new ConversationExpiredException(null, cid, page, RequestCycle.get()
 					.getActiveRequestHandler());

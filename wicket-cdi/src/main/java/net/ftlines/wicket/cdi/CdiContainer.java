@@ -110,7 +110,7 @@ public class CdiContainer
 	 *            page instance
 	 * @return conversation id, if any
 	 */
-	public String getConverastionMarker(Page page)
+	public String getConversationMarker(Page page)
 	{
 		return page.getMetaData(ConversationIdMetaKey.INSTANCE);
 	}
