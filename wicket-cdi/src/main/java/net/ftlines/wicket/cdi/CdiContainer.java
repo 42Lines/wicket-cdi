@@ -137,6 +137,7 @@ public class CdiContainer
 		}
 
 		page.setMetaData(ConversationIdMetaKey.INSTANCE, null);
+		page.getPageParameters().remove(ConversationPropagator.CID);
 	}
 
 	/**
