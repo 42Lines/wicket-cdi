@@ -138,7 +138,7 @@ public class CdiConfiguration
 				"Configuration does not have a BeanManager instance configured");
 		}
 
-		CdiContainer container = new CdiContainer(beanManager, nonContextualManager, getPropagation());
+		CdiContainer container = new CdiContainer(beanManager, nonContextualManager);
 		container.bind(application);
 
 		RequestCycleListenerCollection listeners = new RequestCycleListenerCollection();

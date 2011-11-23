@@ -56,7 +56,7 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	};
 
 
-	private static final String CID = "cid";
+	public static final String CID = "cid";
 
 	private final CdiContainer container;
 

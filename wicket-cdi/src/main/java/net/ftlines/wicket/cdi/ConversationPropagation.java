@@ -27,27 +27,13 @@ import javax.enterprise.context.ConversationScoped;
  */
 public enum ConversationPropagation {
 	/** No conversational propagation takes place */
-	NONE(true),
+	NONE,
 	/**
 	 * Pesistent conversations are propagated between non-bookmarkable pages only
 	 */
-	NONBOOKMARKABLE(true),
+	NONBOOKMARKABLE,
 	/**
 	 * Persistent conversations are propagated between bookmarkable and non-bookmarkable pages
 	 */
-	ALL(false);
-
-	private boolean supportsPropagationMarkerRemoval;
-
-	private ConversationPropagation(boolean supportsPropagationMarkerRemoval)
-	{
-		this.supportsPropagationMarkerRemoval = supportsPropagationMarkerRemoval;
-	}
-
-	public boolean getSupportsPropagationMarkerRemoval()
-	{
-		return supportsPropagationMarkerRemoval;
-	}
-
-
+	ALL;
 }
