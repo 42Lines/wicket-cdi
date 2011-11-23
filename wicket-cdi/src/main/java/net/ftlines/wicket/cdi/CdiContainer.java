@@ -43,7 +43,6 @@ public class CdiContainer
 	protected final BeanManager beanManager;
 	private final SeamConversationContext<HttpServletRequest> conversationContext;
 	private final INonContextualManager nonContextualManager;
-	private final ConversationPropagation conversationPropagation;
 
 	/**
 	 * Constructor
@@ -51,16 +50,13 @@ public class CdiContainer
 	 * @param beanManager
 	 *            bean manager
 	 */
-	public CdiContainer(BeanManager beanManager, INonContextualManager nonContextualManager,
-		ConversationPropagation conversationPropagation)
+	public CdiContainer(BeanManager beanManager, INonContextualManager nonContextualManager)
 	{
 		Args.notNull(beanManager, "beanManager");
 		Args.notNull(nonContextualManager, "nonContextualManager");
-		Args.notNull(conversationPropagation, "conversationPropagation");
 
 		this.beanManager = beanManager;
 		this.nonContextualManager = nonContextualManager;
-		this.conversationPropagation = conversationPropagation;
 
 		conversationContext = SeamConversationContextFactory.getContext(HttpServletRequest.class);
 		if (conversationContext == null)
@@ -121,20 +117,10 @@ public class CdiContainer
 	 * method.
 	 * 
 	 * @param page
-	 * 
-	 * @throws UnsupportedOperationException
-	 *             if conversation propagation mode does not support this method
 	 */
 	public void removeConversationMarker(Page page)
 	{
 		Args.notNull(page, "page");
-
-		if (!conversationPropagation.getSupportsPropagationMarkerRemoval())
-		{
-			throw new UnsupportedOperationException("Current conversational propagation mode: " +
-				conversationPropagation.name() +
-				" does not support the ability to remove the converation marker");
-		}
 
 		page.setMetaData(ConversationIdMetaKey.INSTANCE, null);
 		page.getPageParameters().remove(ConversationPropagator.CID);
