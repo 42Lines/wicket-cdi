@@ -18,6 +18,8 @@ package net.ftlines.wicket.cdi;
 
 import javax.enterprise.context.ConversationScoped;
 
+import org.apache.wicket.request.IRequestHandler;
+
 /**
  * Various modes of propagating persistent conversations across requests.
  * 
@@ -25,15 +27,51 @@ import javax.enterprise.context.ConversationScoped;
  * 
  * @author igor
  */
-public enum ConversationPropagation {
+public enum ConversationPropagation implements IConversationPropagation {
 	/** No conversational propagation takes place */
-	NONE,
+	NONE {
+		@Override
+		public boolean propagatesViaPage(IRequestHandler handler)
+		{
+			return false;
+		}
+
+		@Override
+		public boolean propagatesViaParameters(IRequestHandler handler)
+		{
+			return false;
+		}
+	},
 	/**
 	 * Pesistent conversations are propagated between non-bookmarkable pages only
 	 */
-	NONBOOKMARKABLE,
+	NONBOOKMARKABLE {
+		@Override
+		public boolean propagatesViaPage(IRequestHandler handler)
+		{
+			return true;
+		}
+
+		@Override
+		public boolean propagatesViaParameters(IRequestHandler handler)
+		{
+			return false;
+		}
+	},
 	/**
 	 * Persistent conversations are propagated between bookmarkable and non-bookmarkable pages
 	 */
-	ALL;
+	ALL {
+		@Override
+		public boolean propagatesViaPage(IRequestHandler handler)
+		{
+			return true;
+		}
+
+		@Override
+		public boolean propagatesViaParameters(IRequestHandler handler)
+		{
+			return true;
+		}
+	};
 }

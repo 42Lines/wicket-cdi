@@ -25,6 +25,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.application.IComponentOnBeforeRenderListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Checks for conversation expiration during page render and throws a
@@ -38,6 +40,8 @@ import org.apache.wicket.util.lang.Objects;
  */
 public class ConversationExpiryChecker implements IComponentOnBeforeRenderListener
 {
+	private static final Logger logger = LoggerFactory.getLogger(ConversationExpiryChecker.class);
+	
 	@Inject
 	private Conversation conversation;
 
@@ -58,8 +62,11 @@ public class ConversationExpiryChecker implements IComponentOnBeforeRenderListen
 			Page page = component.getPage();
 			String cid = container.getConversationMarker(page);
 			if (cid != null && !Objects.isEqual(conversation.getId(), cid))
+			{
+				logger.info("Conversation {} has expired for {}", cid, page);
 				throw new ConversationExpiredException(null, cid, page, RequestCycle.get()
 					.getActiveRequestHandler());
+			}
 		}
 	}
 }
