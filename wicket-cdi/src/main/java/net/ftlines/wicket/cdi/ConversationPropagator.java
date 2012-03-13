@@ -35,6 +35,7 @@ import org.apache.wicket.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.request.handler.IPageRequestHandler;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.lang.Args;
 import org.apache.wicket.util.lang.Objects;
 import org.slf4j.Logger;
@@ -173,20 +174,17 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	{
 		Conversation conversation = getConversation(cycle);
 
-		if (conversation == null)
+		if (conversation == null || conversation.isTransient())
 		{
 			return;
 		}
 
 
-		if (propagation.propagatesViaPage(handler))
+		Page page = getPage(handler);
+		if (page != null && propagation.propagatesViaPage(page, handler))
 		{
 			// propagate a conversation across non-bookmarkable page instances
-			Page page = getPage(handler);
-			if (!conversation.isTransient() && page != null)
-			{
-				setConversationOnPage(conversation, page);
-			}
+			setConversationOnPage(conversation, page);
 		}
 	}
 
@@ -199,14 +197,11 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 			return;
 		}
 
-		if (propagation.propagatesViaPage(handler))
+		Page page = getPage(handler);
+		if (page != null && propagation.propagatesViaPage(page, handler))
 		{
 			// propagate a conversation across non-bookmarkable page instances
-			Page page = getPage(handler);
-			if (page != null)
-			{
-				setConversationOnPage(conversation, page);
-			}
+			setConversationOnPage(conversation, page);
 		}
 
 		if (propagation.propagatesViaParameters(handler))
@@ -237,8 +232,14 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	@Override
 	public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url)
 	{
+		// no need to propagate the conversation to packaged resources, they should never change
 		if (handler instanceof ResourceReferenceRequestHandler)
-			return;
+		{
+			if (((ResourceReferenceRequestHandler)handler).getResourceReference() instanceof PackageResourceReference)
+			{
+				return;
+			}
+		}
 
 		Conversation conversation = getConversation(cycle);
 
@@ -308,7 +309,9 @@ public class ConversationPropagator extends AbstractRequestCycleListener
 	public static Page getPage(IRequestHandler handler)
 	{
 		while (handler instanceof IRequestHandlerDelegate)
+		{
 			handler = ((IRequestHandlerDelegate)handler).getDelegateHandler();
+		}
 
 		if (handler instanceof IPageRequestHandler)
 		{

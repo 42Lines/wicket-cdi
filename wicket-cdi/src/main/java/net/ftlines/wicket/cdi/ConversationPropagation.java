@@ -18,6 +18,7 @@ package net.ftlines.wicket.cdi;
 
 import javax.enterprise.context.ConversationScoped;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.request.IRequestHandler;
 
 /**
@@ -31,7 +32,7 @@ public enum ConversationPropagation implements IConversationPropagation {
 	/** No conversational propagation takes place */
 	NONE {
 		@Override
-		public boolean propagatesViaPage(IRequestHandler handler)
+		public boolean propagatesViaPage(Page page, IRequestHandler handler)
 		{
 			return false;
 		}
@@ -47,7 +48,7 @@ public enum ConversationPropagation implements IConversationPropagation {
 	 */
 	NONBOOKMARKABLE {
 		@Override
-		public boolean propagatesViaPage(IRequestHandler handler)
+		public boolean propagatesViaPage(Page page, IRequestHandler handler)
 		{
 			return true;
 		}
@@ -63,7 +64,7 @@ public enum ConversationPropagation implements IConversationPropagation {
 	 */
 	ALL {
 		@Override
-		public boolean propagatesViaPage(IRequestHandler handler)
+		public boolean propagatesViaPage(Page page, IRequestHandler handler)
 		{
 			return true;
 		}
