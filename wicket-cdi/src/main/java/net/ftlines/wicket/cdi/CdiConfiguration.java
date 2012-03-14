@@ -32,7 +32,7 @@ import org.jboss.seam.conversation.spi.SeamConversationContextFactory;
 public class CdiConfiguration
 {
 	private BeanManager beanManager;
-	private ConversationPropagation propagation = ConversationPropagation.NONBOOKMARKABLE;
+	private IConversationPropagation propagation = ConversationPropagation.NONBOOKMARKABLE;
 	private INonContextualManager nonContextualManager;
 
 	private boolean injectComponents = true;
@@ -59,12 +59,12 @@ public class CdiConfiguration
 		return beanManager;
 	}
 
-	public ConversationPropagation getPropagation()
+	public IConversationPropagation getPropagation()
 	{
 		return propagation;
 	}
 
-	public CdiConfiguration setPropagation(ConversationPropagation propagation)
+	public CdiConfiguration setPropagation(IConversationPropagation propagation)
 	{
 		this.propagation = propagation;
 		return this;
