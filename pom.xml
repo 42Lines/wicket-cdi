@@ -28,7 +28,7 @@
 		<module>wicket-cdi-examples</module>
 	</modules>
 	<properties>
-		<wicket.version>1.5.3</wicket.version>
+		<wicket.version>6.0.0-beta3</wicket.version>
 		<junit.version>4.8.1</junit.version>
 		<jetty.version>6.1.25</jetty.version>
 		<slf4j.version>1.6.2</slf4j.version>
@@ -96,14 +96,6 @@
 				<artifactId>wicket-core</artifactId>
 				<version>${wicket.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-util</artifactId>
-				<classifier>tests</classifier>
-				<scope>test</scope>
-				<version>${wicket.version}</version>
-			</dependency>
-			
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>

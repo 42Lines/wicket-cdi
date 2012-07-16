@@ -57,7 +57,7 @@ public class ConversationExpiryChecker implements IComponentOnBeforeRenderListen
 	@Override
 	public void onBeforeRender(Component component)
 	{
-		if (component instanceof Page || AjaxRequestTarget.get() != null)
+		if (component instanceof Page || RequestCycle.get().find(AjaxRequestTarget.class) != null)
 		{
 			Page page = component.getPage();
 			String cid = container.getConversationMarker(page);
