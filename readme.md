@@ -1,4 +1,9 @@
+#Wicket-CDI
+
 Wicket-CDI provides integration of CDI into Wicket
+
+## Notable Branches
+* `wicket-6` branch contains Wicket 6 compatible version
 
 ## Features
 
