@@ -2,6 +2,8 @@
 
 Wicket-CDI provides integration of CDI into Wicket
 
+Wicket-CDI will be available as an official Wicket module starting with Wicket 6.1.0. This project will remain here to maintain a version compatible with Wicket 1.5.x and 6.0.x.
+
 ## Notable Branches
 * `wicket-6` branch contains Wicket 6 compatible version
 
